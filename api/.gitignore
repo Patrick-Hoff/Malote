@@ -1,0 +1,5 @@
+# Senhas
+.env
+
+# Dependências do Node.js
+node_modules/

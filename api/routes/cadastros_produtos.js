@@ -1,9 +1,9 @@
 import express from 'express'
 import {
-getCadastros,
-insertCadastros,
-editCadastro,
-// getCadastroSearch
+    getCadastros,
+    insertCadastros,
+    editCadastro,
+    // getCadastroSearch
 } from '../controllers/cadastro_produtos.js'
 
 const router = express.Router()
@@ -48,45 +48,68 @@ const router = express.Router()
  * @swagger
  * /cadastros:
  *   get:
- *     summary: Retorna cadastros com filtros, paginação, ordenação por data (mais recentes primeiro) e filtro opcional por id
+ *     summary: Retorna a lista de cadastros com filtros opcionais e paginação
  *     tags: [Cadastros]
+ *     description: >
+ *       Este endpoint retorna cadastros aplicando filtros opcionais por **id**, **destinatário**,  
+ *       **remetente** e **observação**, além de paginação e ordenação por data (mais recentes primeiro).  
+ *       Caso nenhuma correspondência seja encontrada, o endpoint retorna um objeto informando  
+ *       `"Nenhum cadastro encontrado."` e `data` como um array vazio.
  *     parameters:
  *       - in: query
  *         name: id
  *         schema:
  *           type: string
- *         description: Filtra pelo id exato do cadastro. Se não for fornecido, todos os cadastros são retornados.
+ *           example: "12"
+ *         description: >
+ *           Filtro opcional pelo ID (busca parcial usando LIKE).  
+ *           Caso não seja informado, todos os IDs são considerados.
  *       - in: query
  *         name: destinatario
  *         schema:
  *           type: string
- *         description: Filtra pelo nome do destinatário (busca parcial usando LIKE)
+ *           example: "Estoque"
+ *         description: Filtro parcial pelo destinatário (usando LIKE).
  *       - in: query
  *         name: remetente
  *         schema:
  *           type: string
- *         description: Filtra pelo nome do remetente (busca parcial usando LIKE)
+ *           example: "Fornecedor"
+ *         description: Filtro parcial pelo remetente (usando LIKE).
  *       - in: query
  *         name: observacao
  *         schema:
  *           type: string
- *         description: Filtra pela observação cadastrada (busca parcial usando LIKE)
+ *           example: "urgente"
+ *         description: Filtro parcial pela observação registrada.
  *       - in: query
  *         name: pagina
  *         schema:
  *           type: integer
  *           example: 1
  *           minimum: 1
- *         description: Número da página para paginação (20 registros por página). O valor padrão é 1.
+ *         description: Número da página para paginação (20 registros por página). O padrão é **1**.
  *     responses:
  *       200:
- *         description: Lista de cadastros retornada com sucesso, filtrada e ordenada por data
+ *         description: Lista de cadastros retornada com sucesso. Pode retornar lista vazia com mensagem.
  *         content:
  *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Cadastro'
+ *             oneOf:
+ *               - description: Retorno com dados encontrados
+ *                 schema:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Cadastro'
+ *               - description: Nenhum cadastro encontrado
+ *                 schema:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: "Nenhum cadastro encontrado."
+ *                     data:
+ *                       type: array
+ *                       example: []
  *       500:
  *         description: Erro interno do servidor
  *         content:

@@ -2,19 +2,19 @@ import { db } from '../db.js'
 
 export const getCadastros = (req, res) => {
     try {
-        const id = req.query.id || '';
+        const id = req.query.id ? `%${req.query.id}%` : '%';
         const destinatario = req.query.destinatario || '';
         const remetente = req.query.remetente || '';
         const observacao = req.query.observacao || '';
 
-        const pagina = parseInt(req.query.pagina) || 1;   // página atual
+        const pagina = parseInt(req.query.pagina) || 1;
         const limit = 20;
         const offset = (pagina - 1) * limit;
 
         const q = `
             SELECT * FROM cadastros
-            WHERE id = ? AND
-            destinatario LIKE ?
+            WHERE CAST(id AS CHAR) LIKE ?
+            AND destinatario LIKE ?
             AND remetente LIKE ?
             AND observacao LIKE ?
             ORDER BY data DESC
@@ -38,6 +38,13 @@ export const getCadastros = (req, res) => {
                     details: err
                 });
             }
+
+            if(data.length === 0) {
+                return res.status(200).json({
+                    message: 'Nenhum cadastro encontrado.',
+                    data: []
+                })
+            }
             return res.status(200).json(data);
         });
     } catch (error) {
@@ -47,6 +54,7 @@ export const getCadastros = (req, res) => {
         });
     }
 };
+
 
 export const insertCadastros = (req, res) => {
     try {
